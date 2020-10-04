@@ -1,4 +1,4 @@
-# Fuzzy-logic
+# Fuzzy logic inverted pendulum
 A fuzzy controller with a simulation done in fcl language
 
 Requirements:
