@@ -1,0 +1,58 @@
+FUNCTION_BLOCK Inverted_Pendulum
+
+    VAR_INPUT
+        theta : REAL;
+        theta_dot : REAL;
+        
+    END_VAR
+
+    VAR_OUTPUT
+        F : REAL;
+        
+    END_VAR
+
+    FUZZIFY theta
+        TERM Leftt := (270, 0) (360, 1);
+        TERM Left := (180,0) (200,1) (220,0);
+        TERM CenterL:=  (180,1) (200,0);
+        TERM CenterR :=  (160,0) (180,1);
+        TERM Right :=  (140,0) (160,1) (180,0);
+        TERM Rightt := (0, 1) (90, 0);  
+    END_FUZZIFY
+
+    FUZZIFY theta_dot
+        TERM clockwise_veryfast :=(-105,0) (-95,1) (-65,0 );
+        TERM clockwise_fast := (-60,0) (-40,1) (-20,0);
+        TERM clockwise := (-20,0) (-15,1) (-2,0);
+        TERM counterclockwise := (2,0) (15,1) (20,0);
+        TERM counterclockwise_fast := (20,0) (40,1) (60,0);
+        TERM counterclockwise_veryfast := (65,0) (95,1) (105,0);
+    END_FUZZIFY
+
+    DEFUZZIFY F
+        TERM GoRight := (60, 0) (80, 1) (100, 0) ;
+        TERM GoRightFast := (150, 0) (300, 1) (450, 0) ;
+        TERM GoRightFaster := (350, 0) (500, 1) (650, 0) ;
+        TERM GoLeft := (-100, 0) (-80, 1) (-60, 0) ;
+        TERM GoLeftFast := (-450, 0) (-300, 1) (-150, 0) ;
+        TERM GoLeftFaster := (-650, 0) (-500, 1) (-350, 0) ;
+        ACCU : MAX; 
+        METHOD : COG;
+        DEFAULT := 0;
+    END_DEFUZZIFY
+
+    RULEBLOCK Inverted_Pendulum
+        AND : AlgebraicProduct;
+        OR : MAX;
+    
+        RULE 1 : IF theta IS Rightt THEN F IS GoRight;
+        RULE 6 : IF theta IS Right THEN F IS GoRightFast;
+        RULE 3 : IF theta IS CenterR AND (theta_dot IS clockwise OR theta_dot IS clockwise_fast) THEN F IS GoRightFaster;
+        RULE 4 : IF theta IS CenterL AND (theta_dot IS counterclockwise OR theta_dot IS counterclockwise_fast) THEN F IS GoLeftFaster; 
+        RULE 5 : IF theta IS Left THEN F IS GoLeftFast;
+        RULE 2 : IF theta IS Leftt THEN F IS GoLeft;
+        
+
+    END_RULEBLOCK
+
+END_FUNCTION_BLOCK
